@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Star, Eye, EyeOff, Loader2, AlertCircle, CheckCircle } from "lucide-react";
 import { registerWithUsername } from "@/lib/auth-service";
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/client";
 import { PACKAGES } from "@/lib/packages";
 
 export default function RegisterPage() {
@@ -86,14 +86,17 @@ const normalizedUsername = formData.username.trim().toLowerCase();
       return;
     }
 
-    await supabase.from("profiles").update({
-      package_id: selectedPlan.id,
-      package_activated_at: new Date().toISOString(),
-      package_expires_at: new Date(
-        Date.now() + selectedPlan.durationDays * 24 * 60 * 60 * 1000
-      ).toISOString(),
-      status: selectedPlan.id === "starter" ? "active" : "pending",
-    }).eq("id", profileId);
+    const supabase = createClient();
+    if (supabase) {
+      await supabase.from("profiles").update({
+        package_id: selectedPlan.id,
+        package_activated_at: new Date().toISOString(),
+        package_expires_at: new Date(
+          Date.now() + selectedPlan.durationDays * 24 * 60 * 60 * 1000
+        ).toISOString(),
+        status: selectedPlan.id === "starter" ? "active" : "pending",
+      }).eq("id", profileId);
+    }
 
       if (selectedPlan.id !== "starter") {
         router.push(`/payment?plan=${selectedPlan.id}`);

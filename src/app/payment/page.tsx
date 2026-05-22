@@ -42,6 +42,10 @@ function PaymentClient() {
   useEffect(() => {
     const getUser = async () => {
       const supabase = createClient();
+      if (!supabase) {
+        setError("Supabase is not configured. Please add environment variables.");
+        return;
+      }
       const {
         data: { user },
       } = await supabase.auth.getUser();

@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Star, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import { loginWithUsername } from "@/lib/auth-service";
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   return (
@@ -48,12 +48,15 @@ function LoginClient() {
       // Check for admin role
       let targetRoute = "/dashboard";
       if (result.user?.id) {
-        const { data: roles } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", result.user.id);
-        if (roles?.some((r) => r.role === "admin")) {
-          targetRoute = "/admin";
+        const supabase = createClient();
+        if (supabase) {
+          const { data: roles } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", result.user.id);
+          if (roles?.some((r) => r.role === "admin")) {
+            targetRoute = "/admin";
+          }
         }
       }
 

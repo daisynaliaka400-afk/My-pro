@@ -1,4 +1,16 @@
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/client";
+
+/**
+ * Get the Supabase client instance
+ * Throws an error if Supabase is not configured
+ */
+function getSupabase() {
+  const client = createClient();
+  if (!client) {
+    throw new Error("Supabase is not configured. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.");
+  }
+  return client;
+}
 
 /**
  * Simple password hashing using Web Crypto API (not production-grade)
@@ -45,6 +57,7 @@ interface AuthResponse {
  */
 export async function loginWithUsername(credentials: LoginCredentials): Promise<AuthResponse> {
   try {
+    const supabase = getSupabase();
     const { username, password } = credentials;
 
     // Fetch user by username
@@ -97,6 +110,7 @@ export async function loginWithUsername(credentials: LoginCredentials): Promise<
  */
 export async function registerWithUsername(credentials: RegisterCredentials): Promise<AuthResponse> {
   try {
+    const supabase = getSupabase();
     const { username, phone, password, referral_code } = credentials;
 
     // Check if username exists
